@@ -3,8 +3,8 @@ session_start();
 
 // Verifica se o usuário está logado
 if (!isset($_SESSION['id_usuario'])) {
-    header('Location: index.php');
-    exit;
+  header('Location: erro401.php');
+  exit;
 }
 
 // Conectar ao banco de dados
@@ -16,7 +16,7 @@ $senhaBanco = '';
 $conexao = new mysqli($host, $usuario, $senhaBanco, $banco);
 
 if ($conexao->connect_error) {
-    die("Erro de conexão: " . $conexao->connect_error);
+  die("Erro de conexão: " . $conexao->connect_error);
 }
 
 $mensagem = '';
@@ -25,38 +25,92 @@ $conexao->close();
 
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="images/Logo.ico" type="image/x-icon" />
   <title>Lumiener - Entenda os Cálculos</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="styleConteudo.css" />
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.11/jquery.mask.min.js"></script>
-  
+
   <style>
+        /* Media query para dispositivos móveis */
+    @media (max-width: 768px) {
+      .calculator-container {
+        max-height: 500px;
+        overflow-y: auto;
+        padding-right: 10px; /* Padding to avoid content hiding behind the scrollbar */
+      }
+
+      .calculator-container::-webkit-scrollbar,
+      .climate-report-container::-webkit-scrollbar {
+        width: 10px;
+      }
+
+      .calculator-container::-webkit-scrollbar-track,
+      .climate-report-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+
+      .calculator-container::-webkit-scrollbar-thumb,
+      .climate-report-container::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 5px;
+      }
+
+      .calculator-container::-webkit-scrollbar-thumb:hover,
+      .climate-report-container::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      }
+
+      body.dark-theme .calculator-container::-webkit-scrollbar-track,
+      body.dark-theme .climate-report-container::-webkit-scrollbar-track {
+        background: #333;
+      }
+
+      body.dark-theme .calculator-container::-webkit-scrollbar-thumb,
+      body.dark-theme .climate-report-container::-webkit-scrollbar-thumb {
+        background: #ffa600;
+      }
+
+      body.dark-theme .calculator-container::-webkit-scrollbar-thumb:hover,
+      body.dark-theme .climate-report-container::-webkit-scrollbar-thumb:hover {
+        background: #ff8c00;
+      }
+    }
+
     .calculator-container {
       background-color: #f9f9f9;
-      border: 1px solid #ccc;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-      margin: 20px auto;
-      width: 70%;
+      border: 3px solid #ccc;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+      padding: 25px;
+      margin-left: auto;
+      margin-right: auto;
+      width: 100%;
+      max-width: 800px;
+      /* Tamanho máximo fixo */
+      margin-bottom: 20px;
+      /* Margem inferior para não sobrepor o footer */
       text-align: center;
     }
 
     .calculator-title {
       font-size: 24px;
-      color: #333;
       margin-bottom: 20px;
+      font-weight: bold;
+      text-align: center;
+      position: relative;
     }
 
     .theme-btn {
-      width: 40px; /* Largura total do interruptor */
+      width: 40px;
       height: 20px;
-      background: gray; /* Cor de fundo quando está desativado */
+      background: gray;
       border-radius: 10px;
       position: relative;
       transition: background 0.5s;
@@ -64,8 +118,8 @@ $conexao->close();
 
     .theme-ball {
       position: absolute;
-      top: 2px; /* Espaço pequeno do topo para parecer um botão */
-      left: 2px; /* Começa à esquerda quando desativado */
+      top: 2px;
+      left: 2px;
       width: 16px;
       height: 16px;
       background-color: #fff;
@@ -74,51 +128,49 @@ $conexao->close();
     }
 
     .theme-btn.active {
-      background: #ffa600; /* Cor laranja, igual aos ícones do menu lateral */
+      background: #ffa600;
     }
 
     .theme-btn .theme-ball.active {
-      left: 22px; /* Mova para a direita quando ativado */
+      left: 22px;
     }
 
     .theme-btn,
     .theme-btn .theme-ball,
     .home,
     .footer#footer {
-        transition: var(--transition);  /* Usa a mesma duração de transição definida no root */
+      transition: var(--transition);
     }
 
     .calculator-container ul {
-      text-align: left; /* Alinha o texto à esquerda dentro da lista */
-      padding: 0 20px; /* Adiciona padding para a lista não colar nas bordas */
+      text-align: left;
+      padding: 0 20px;
     }
 
     .calculator-container li {
-      margin-bottom: 10px; /* Adiciona espaço entre os itens da lista */
+      margin-bottom: 10px;
     }
 
     body.dark-theme {
       background-color: #333;
     }
 
-    body.dark-theme .home
-    {
+    body.dark-theme .home {
       background-color: #000;
     }
 
-    body.dark-theme .lumiener#lumiener{
+    body.dark-theme .lumiener#lumiener {
       color: #ffa600;
     }
 
-    body.dark-theme .footer#footer{
+    body.dark-theme .footer#footer {
       background-color: #000 !important;
       color: #ffa600 !important;
     }
 
     body.dark-theme .sidebar,
     body.dark-theme .logo,
-    body.dark-theme .nav-links
-    {
+    body.dark-theme .nav-links {
       background-color: #333;
       color: #fff;
     }
@@ -133,56 +185,48 @@ $conexao->close();
       color: #ffa600 !important;
     }
 
-    body.dark-theme .result-text
-    {
+    body.dark-theme .result-text {
       background-color: #444;
     }
 
-    body.dark-theme p{
+    body.dark-theme p {
       color: #fff;
     }
 
-    /* CSS para ícones no tema escuro */
-    body.dark-theme .nav-links i{
-        color: #fff;/* Cor branca para os ícones no tema escuro */
+    body.dark-theme .nav-links i {
+      color: #fff;
     }
 
-    /* CSS para o ícone do menu no modo escuro */
     body.dark-theme .btn-menu {
-        color: #fff; /* Muda a cor para branco */
+      color: #fff;
     }
 
-    /* Muda a cor do texto dos títulos dos links para branco no tema escuro */
     body.dark-theme .nav-links .title {
-        color: #fff;
+      color: #fff;
     }
 
-    /* Muda a cor do texto dos tooltips para branco no tema escuro */
     body.dark-theme .tooltip {
-        color: #fff;
-        background: #333; /* ou outra cor que se destaque no fundo escuro */
+      color: #fff;
+      background: #333;
     }
 
-    /* Fundo padrão para os ícones no modo escuro */
     body.dark-theme .nav-links li a {
-      background: #333; /* Fundo escuro para os ícones no modo escuro */
-      border-radius: 12px; /* Mantém as bordas arredondadas */
+      background: #333;
+      border-radius: 12px;
     }
 
-    /* Fundo ao passar o mouse no modo escuro */
     body.dark-theme .nav-links li:hover a {
-      background: #ffa600; /* Laranja ao passar o mouse */
-      border-radius: 12px; /* Mantém as bordas arredondadas */
+      background: #ffa600;
+      border-radius: 12px;
     }
 
-    /* Estilo da trilha para o modo escuro */
     body.dark-theme input[type=range]::-webkit-slider-runnable-track {
       border-radius: 50px;
-      background: #ccc; /* Sua cor desejada para o modo escuro */
+      background: #ccc;
     }
 
     body.dark-theme .btn-whatsapp {
-      background-color: #28A745; /* Cor mais escura para botão WhatsApp no tema escuro */
+      background-color: #28A745;
     }
 
     body.dark-theme .btn-whatsapp:hover {
@@ -190,21 +234,39 @@ $conexao->close();
     }
 
     .theme-icon.sun {
-    color: #fff; /* Define a cor do ícone para branco */
+      color: #fff;
     }
 
+    .footer {
+      text-align: center;
+      padding: 10px 0;
+      font-size: 1em;
+      color: #777;
+      width: calc(100% - 78px);
+      background: #e2e2e2;
+      position: absolute;
+      bottom: 0;
+      left: 78px;
+      transition: var(--transition);
+    }
+
+    .sidebar.expand~.footer {
+      left: 250px;
+      width: calc(100% - 250px);
+      transition: var(--transition);
+    }
   </style>
 </head>
 
 <body>
 <section class="sidebar">
     <div class="nav-header">
-      <p class="logo" style=""><?php echo $_SESSION['nome_usuario'];?></p>
+      <p class="logo"><?php echo $_SESSION['nome_usuario']; ?></p>
       <i class="bx bx-menu-alt-right btn-menu"></i>
     </div>
     <ul class="nav-links">
       <li>
-        <a href="conteudo.php">
+        <a href="selecao_local.php">
           <i class="bx bx-home-alt-2"></i>
           <span class="title">Início</span>
         </a>
@@ -218,8 +280,15 @@ $conexao->close();
         <span class="tooltip">Sobre os cálculos</span>
       </li>
       <li>
-        <a href="estatisticas.php">
-          <i class="bx bx-bar-chart"></i>
+        <a href="historico.php">
+          <i class='bx bx-history'></i>
+          <span class="title">Histórico</span>
+        </a>
+        <span class="tooltip">Histórico</span>
+      </li>
+      <li>
+        <a href="relatorio.php">
+          <i class="bx bx-bar-chart-alt-2"></i>
           <span class="title">Estatísticas</span>
         </a>
         <span class="tooltip">Estatísticas</span>
@@ -248,84 +317,75 @@ $conexao->close();
     </div>
   </section>
   <section class="home">
-    <p id="lumiener" class="lumiener">Lumiener</p>
+    <p id="lumiener" class="lumiener" style="margin: 1.5%;">Lumiener</p>
     <div class="calculator-container">
-      <div class="calculator-title">Entenda os Cálculos</div>
-      <p>Como é feito o calcúlo do nosso sistema:</p>
+      <h2 class="calculator-title">Entenda os Cálculos</h2>
+      <p>Como é feito o cálculo do nosso sistema:</p>
       <ul>
-        <li>A "Solar Insolation" (incidência solar diária média) é fundamental por várias razões:</li>
-        <li>Cálculo da Capacidade de Geração de Energia: Saber a incidência solar na localização do usuário permite calcular quantos kWh de energia podem ser gerados por cada metro quadrado de painel solar por dia. Isso ajuda a determinar quantos painéis são necessários para atender às necessidades de energia do usuário.</li>
-        <li>Eficiência do Sistema Solar: A eficácia de um sistema solar depende fortemente da quantidade de sol disponível. Em regiões com maior irradiação solar, menos painéis podem ser necessários para gerar a mesma quantidade de energia.
-        Planejamento de Investimento: Ao compreender a irradiação solar, os investidores ou proprietários podem fazer cálculos mais precisos sobre o retorno do investimento em sistemas solares.</li>
-        <li><b>Na seção do script onde o cálculo é realizado:</b></li>
-        <li>Calcula-se o Consumo Mensal em kWh: Divide-se o valor da conta de luz pelo custo da energia por kWh (tarifa).</li>
-        <li>Calcula-se o Consumo Diário: O consumo mensal é dividido por 30 dias.</li>
-        <li>Determina-se o kW Pico Necessário: Divide-se o consumo diário pela "Solar Insolation" para encontrar a capacidade de geração necessária por dia em kW pico.</li>
-        <li>Transforma-se kW Pico em Watts Necessários: Multiplica-se por 1000 para converter kW em Watts.</li>
-        <li>Calcula-se o Número de Placas Necessárias: Divide-se os Watts necessários pela potência de uma placa solar individual.</li>
-        <li>Cada etapa do cálculo é impactada pela "Solar Insolation", pois ela determina quanta energia solar está disponível para ser convertida em eletricidade. Sem essa informação, não é possível prever com precisão quantos painéis solares são necessários.</li>
+        <li>Divide-se o valor da conta de luz pelo custo da tarifa de energia para obter o consumo mensal em kWh.</li>
+        <li>Divide-se o consumo mensal em kWh por 30 para calcular o consumo diário.</li>
+        <li>Divide-se o consumo diário pela incidência solar diária média para encontrar a capacidade de geração
+          necessária em kW (diária).</li>
+        <li>Multiplicar a capacidade de geração necessária em kW por 1000 para converter para Watts necessários (pois 1 kW = 1000 Watts).</li>
+        <li>Divide-se os Watts necessários pela potência de uma placa solar para calcular o número de painéis
+          necessários.</li>
       </ul>
     </div>
   </section>
   <script>
-      const btn_menu = document.querySelector(".btn-menu");
-      const side_bar = document.querySelector(".sidebar");
+    const btn_menu = document.querySelector(".btn-menu");
+    const side_bar = document.querySelector(".sidebar");
 
-      btn_menu.addEventListener("click", function () {
-        side_bar.classList.toggle("expand");
-        changebtn();
-      });
+    btn_menu.addEventListener("click", function () {
+      side_bar.classList.toggle("expand");
+      changebtn();
+    });
 
-      function changebtn() {
-        if (side_bar.classList.contains("expand")) {
-          btn_menu.classList.replace("bx-menu", "bx-menu-alt-right");
-        } else {
-          btn_menu.classList.replace("bx-menu-alt-right", "bx-menu");
-        }
+    function changebtn() {
+      if (side_bar.classList.contains("expand")) {
+        btn_menu.classList.replace("bx-menu", "bx-menu-alt-right");
+      } else {
+        btn_menu.classList.replace("bx-menu-alt-right", "bx-menu");
       }
+    }
 
-      document.querySelector('.theme-btn').addEventListener('click', function() {
+    document.querySelector('.theme-btn').addEventListener('click', function () {
       const isDarkMode = this.classList.toggle('active');
       this.querySelector('.theme-ball').classList.toggle('active');
-      document.body.classList.toggle('dark-theme'); // Alterna a classe do tema escuro no body
+      document.body.classList.toggle('dark-theme');
 
-      // Salvar a preferência de tema no Local Storage
       localStorage.setItem('darkTheme', isDarkMode ? 'true' : 'false');
 
-      // Alterar ícone e texto conforme o tema
       updateThemeIconAndText(isDarkMode);
-  });
+    });
 
-  function updateThemeIconAndText(isDarkMode) {
+    function updateThemeIconAndText(isDarkMode) {
       const themeIcon = document.querySelector('.theme-icon');
       const themeText = document.querySelector('.theme-wrapper p');
       if (isDarkMode) {
-          themeIcon.className = 'bx bxs-sun theme-icon sun'; // Muda para ícone de sol
-          themeText.textContent = 'Light Theme';
+        themeIcon.className = 'bx bxs-sun theme-icon sun';
+        themeText.textContent = 'Light Theme';
       } else {
-          themeIcon.className = 'bx bxs-moon theme-icon'; // Muda para ícone de lua
-          themeText.textContent = 'Dark Theme';
+        themeIcon.className = 'bx bxs-moon theme-icon';
+        themeText.textContent = 'Dark Theme';
       }
-  }
+    }
 
-  // Verificar a preferência de tema salva ao carregar a página
-  document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       const isDarkTheme = localStorage.getItem('darkTheme') === 'true';
       if (isDarkTheme) {
-          document.body.classList.add('dark-theme');
-          const themeBtn = document.querySelector('.theme-btn');
-          const themeBall = document.querySelector('.theme-ball');
-          themeBtn.classList.add('active');
-          themeBall.classList.add('active');
-          updateThemeIconAndText(true);
+        document.body.classList.add('dark-theme');
+        const themeBtn = document.querySelector('.theme-btn');
+        const themeBall = document.querySelector('.theme-ball');
+        themeBtn.classList.add('active');
+        themeBall.classList.add('active');
+        updateThemeIconAndText(true);
       }
-  });
-
-
-
+    });
   </script>
+  <footer id="footer" class="footer">
+    Copyright &copy; <?php echo date('Y'); ?> <a href="lading-page.html">Lumiener</a>. All rights reserved.
+  </footer>
 </body>
-<footer id="footer" class="footer" style="text-align: center; padding: 10px 0; font-size: 1em; color: #777; width: 100%; background: #e2e2e2; position: relative; clear: both;">
-  &copy; <?php echo date('Y'); ?> Lumiener. Todos os direitos reservados.
-</footer>
+
 </html>

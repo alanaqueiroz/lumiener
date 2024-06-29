@@ -6,8 +6,8 @@ if (!isset($_SESSION['id_usuario'])) {
   exit;
 }
 
-if (isset($_GET['id'])) {
-  $id_simulacao = intval($_GET['id']);
+if (isset($_POST['id_simulacao'])) {
+  $id_simulacao = intval($_POST['id_simulacao']);
   $id_usuario = $_SESSION['id_usuario'];
 
   $host = 'localhost';
@@ -29,12 +29,20 @@ if (isset($_GET['id'])) {
   $stmt->store_result();
 
   if ($stmt->num_rows > 0) {
-    // Excluir resultados primeiro
+    // Excluir tarifas associadas primeiro
+    $stmt->close();
+    $stmt = $conexao->prepare("DELETE FROM tarifas WHERE id_simulacao = ?");
+    $stmt->bind_param("i", $id_simulacao);
+    $stmt->execute();
+    
+    // Excluir resultados associados
+    $stmt->close();
     $stmt = $conexao->prepare("DELETE FROM resultados WHERE id_simulacao = ?");
     $stmt->bind_param("i", $id_simulacao);
     $stmt->execute();
 
     // Excluir simulação
+    $stmt->close();
     $stmt = $conexao->prepare("DELETE FROM simulacoes WHERE id = ?");
     $stmt->bind_param("i", $id_simulacao);
     $stmt->execute();

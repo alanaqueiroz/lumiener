@@ -30,10 +30,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($senha_armazenada && password_verify($senha_inserida, $senha_armazenada)) {
         $_SESSION['id_usuario'] = $id_usuario;
         $_SESSION['nome_usuario'] = $nome_usuario;
-        header('Location: conteudo.php');
+        header('Location: selecao_local.php');
         exit;
     } else {
-        $mensagem_erro = '<div class="alert alert-warning" role="alert">Credenciais inválidas. Tente novamente.</div>';
+      $mensagem_erro = '<div class="alert alert-warning custom-alert" role="alert">Credenciais inválidas. Tente novamente.</div>';
     }
 }
 ?>
@@ -74,12 +74,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
         <div class="error error-txt">Inserir sua senha</div>
       </div>  
+      <div class="sign-txt"><a href="redefinir.php">Esqueceu sua senha?</a></div>
       <input type="submit" value="Entrar">
     </form>
-    <div class="sign-txt">Ainda não é membro? <a href="cadastro.php">Cadastre-se</a></div>
+    <div class="sign-txt">Ainda não é membro? <br><a href="cadastro.php">Cadastre-se</a></div>
   </div>
 </body>
 <footer>
-  &copy; <?php echo date('Y'); ?> Lumiener. Todos os direitos reservados.
+  Copyright &copy; <?php echo date('Y'); ?> <a href="lading-page.html">Lumiener</a>. All rights reserved.
 </footer>
 </html>
